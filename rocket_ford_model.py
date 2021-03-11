@@ -10,16 +10,12 @@ class RocketModel(pl.LightningModule):
     def __init__(self,
                  num_kernels=1000,
                  opt_lengths=None,
-                 ts_length=500,
-                 ridge_lr=1e-3,
-                 ridge_thr=0.5):
+                 ts_length=500):
         super().__init__()
 
         self.num_kernels = num_kernels
         self.opt_lengths = opt_lengths or [7, 9, 11]
         self.ts_length = ts_length
-        self.ridge_lr = ridge_lr
-        self.ridge_thr = ridge_thr
 
         self.kernels = []
         for i in range(num_kernels):
@@ -35,12 +31,14 @@ class RocketModel(pl.LightningModule):
             self.kernels.append(kernel)
 
     def forward(self, x):
-        ppvs = torch.Tensor()
+        features = torch.Tensor()
         for kernel in self.kernels:
             k_out = kernel(x)
             ppv = torch.sum(k_out > 0, axis=2)/k_out.shape[-1]
-            ppvs = torch.cat((ppvs, ppv), dim=1)
-        return ppvs
+            # max = torch.max(k_out, axis=2).values
+            features = torch.cat((features, ppv), dim=1)
+            # features = torch.cat((features, max), dim=1)
+        return features
 
     def training_step(self, batch, batch_idx):
         pass
