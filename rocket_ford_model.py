@@ -34,10 +34,10 @@ class RocketModel(pl.LightningModule):
         features = torch.Tensor()
         for kernel in self.kernels:
             k_out = kernel(x)
-            ppv = torch.sum(k_out > 0, axis=2)/k_out.shape[-1]
-            # max = torch.max(k_out, axis=2).values
-            features = torch.cat((features, ppv), dim=1)
-            # features = torch.cat((features, max), dim=1)
+            ppv_feature = torch.sum(k_out > 0, axis=2)/k_out.shape[-1]
+            max_feature = torch.max(k_out, axis=2).values
+            features = torch.cat((features, ppv_feature), dim=1)
+            features = torch.cat((features, max_feature), dim=1)
         return features
 
     def training_step(self, batch, batch_idx):
